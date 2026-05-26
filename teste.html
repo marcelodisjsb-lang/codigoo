@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>e-Lixo Brasil</title>
+
+  <link rel="stylesheet" href="cs.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">E-co</div>
+
+  <nav>
+    <button onclick="abrirPagina('home')">Início</button>
+    <button onclick="abrirPagina('mapa')">Ver Mapa</button>
+    <button onclick="abrirPagina('locais')">Ver Locais</button>
+  </nav>
+
+</header>
+
+<!-- HOME -->
+<section class="page active" id="home">
+
+  <div class="hero">
+
+    <div class="hero-text">
+      <span class="badge">Sustentabilidade</span>
+
+      <h1>Descarte eletrônico responsável</h1>
+
+      <p>Encontre pontos de coleta próximos de você.</p>
+
+      <button onclick="abrirPagina('mapa')" class="main-button">
+        Ver Mapa
+      </button>
+    </div>
+
+  </div>
+
+</section>
+
+<section class="page" id="mapa">
+
+  <div class="section-title">
+    <h2>Mapa de Pontos</h2>
+  </div>
+
+  <div id="map"></div>
+
+  <button class="mapButton" onclick="abrirPagina('locais')">
+    Ver Locais
+  </button>
+
+</section>
+
+
+<section class="page" id="locais">
+
+  <div class="section-title">
+    <h2>Locais de Coleta</h2>
+  </div>
+
+  <div id="lista-locais" class="locations"></div>
+
+</section>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+function abrirPagina(id){
+
+  document.querySelectorAll(".page")
+    .forEach(p => p.classList.remove("active"));
+
+  document.getElementById(id).classList.add("active");
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 300);
+
+}
+
+const pontos = [
+
+  {
+    estado:"SP",
+    cidade:"São Paulo",
+    bairro:"Bela Vista",
+    nome:"Green Eletron - Paulista",
+    endereco:"Av. Paulista, 1439",
+    cep:"01311-200",
+    maps:"https://www.google.com/maps?q=-23.561684,-46.656139",
+    lat:-23.561684,
+    lng:-46.656139,
+    coleta:["celulares","baterias","eletrônicos pequenos","pilhas","cabos"]
+  },
+
+  {
+    estado:"SP",
+    cidade:"São Paulo",
+    bairro:"Pinheiros",
+    nome:"Kalunga Pinheiros",
+    endereco:"Rua Teodoro Sampaio, 1500",
+    cep:"05406-150",
+    maps:"https://www.google.com/maps?q=-23.5619,-46.6825",
+    lat:-23.5619,
+    lng:-46.6825,
+    coleta:["pilhas","baterias","celulares","cabos","fones"]
+  },
+
+  {
+    estado:"SP",
+    cidade:"Campinas",
+    bairro:"Centro",
+    nome:"Kalunga Campinas",
+    endereco:"Av. Francisco Glicério, 859",
+    cep:"13012-100",
+    maps:"https://www.google.com/maps?q=-22.9056,-47.0608",
+    lat:-22.9056,
+    lng:-47.0608,
+    coleta:["celulares","baterias","computadores","cabos","teclados"]
+  },
+
+  {
+    estado:"RJ",
+    cidade:"Rio de Janeiro",
+    bairro:"Copacabana",
+    nome:"Rio Sul Coleta",
+    endereco:"Rua Lauro Müller, 116",
+    cep:"22290-160",
+    maps:"https://www.google.com/maps?q=-22.9519,-43.1760",
+    lat:-22.9519,
+    lng:-43.1760,
+    coleta:["celulares","baterias","pilhas"]
+  },
+
+  {
+    estado:"RJ",
+    cidade:"Rio de Janeiro",
+    bairro:"Barra da Tijuca",
+    nome:"Leroy Merlin Barra",
+    endereco:"Av. Ayrton Senna, 2000",
+    cep:"22775-003",
+    maps:"https://www.google.com/maps?q=-23.0037,-43.3659",
+    lat:-23.0037,
+    lng:-43.3659,
+    coleta:["computadores","geladeiras","televisores","fios","eletrônicos grandes"]
+  },
+
+  {
+    estado:"MG",
+    cidade:"Belo Horizonte",
+    bairro:"Savassi",
+    nome:"Leroy Merlin BH",
+    endereco:"Av. Nossa Senhora do Carmo, 1700",
+    cep:"30330-000",
+    maps:"https://www.google.com/maps?q=-19.9394,-43.9347",
+    lat:-19.9394,
+    lng:-43.9347,
+    coleta:["eletrônicos","cabos","pilhas","computadores"]
+  },
+
+  {
+    estado:"PR",
+    cidade:"Curitiba",
+    bairro:"Centro",
+    nome:"Kalunga Curitiba",
+    endereco:"Rua XV de Novembro, 759",
+    cep:"80020-310",
+    maps:"https://www.google.com/maps?q=-25.4284,-49.2733",
+    lat:-25.4284,
+    lng:-49.2733,
+    coleta:["celulares","baterias","computadores","fios"]
+  },
+
+  {
+    estado:"RS",
+    cidade:"Porto Alegre",
+    bairro:"Centro Histórico",
+    nome:"Kalunga Porto Alegre",
+    endereco:"Rua dos Andradas, 1001",
+    cep:"90020-007",
+    maps:"https://www.google.com/maps?q=-30.0346,-51.2177",
+    lat:-30.0346,
+    lng:-51.2177,
+    coleta:["pilhas","baterias","eletrônicos","cabos"]
+  },
+
+  {
+    estado:"SC",
+    cidade:"Florianópolis",
+    bairro:"Centro",
+    nome:"Angeloni Beira Mar",
+    endereco:"Av. Gov. Irineu Bornhausen, 5288",
+    cep:"88015-200",
+    maps:"https://www.google.com/maps?q=-27.5954,-48.5480",
+    lat:-27.5954,
+    lng:-48.5480,
+    coleta:["pilhas","baterias","celulares","eletrônicos pequenos"]
+  },
+
+  {
+    estado:"BA",
+    cidade:"Salvador",
+    bairro:"Pituba",
+    nome:"Leroy Merlin Salvador",
+    endereco:"Av. ACM, 3000",
+    cep:"41820-020",
+    maps:"https://www.google.com/maps?q=-12.9714,-38.5014",
+    lat:-12.9714,
+    lng:-38.5014,
+    coleta:["eletrônicos","fios","computadores","televisores"]
+  },
+
+  {
+    estado:"PE",
+    cidade:"Recife",
+    bairro:"Boa Viagem",
+    nome:"RioMar Recife",
+    endereco:"Av. República do Líbano, 251",
+    cep:"51110-160",
+    maps:"https://www.google.com/maps?q=-8.0476,-34.8770",
+    lat:-8.0476,
+    lng:-34.8770,
+    coleta:["celulares","baterias","eletrônicos pequenos","cabos"]
+  },
+
+  {
+    estado:"CE",
+    cidade:"Fortaleza",
+    bairro:"Meireles",
+    nome:"RioMar Fortaleza",
+    endereco:"Rua Desembargador Lauro Nogueira, 1500",
+    cep:"60175-055",
+    maps:"https://www.google.com/maps?q=-3.7319,-38.5267",
+    lat:-3.7319,
+    lng:-38.5267,
+    coleta:["celulares","baterias","eletrônicos","fios"]
+  },
+
+  {
+    estado:"PA",
+    cidade:"Belém",
+    bairro:"Nazaré",
+    nome:"Boulevard Shopping Belém",
+    endereco:"Av. Visconde de Souza Franco, 776",
+    cep:"66053-000",
+    maps:"https://www.google.com/maps?q=-1.4558,-48.4902",
+    lat:-1.4558,
+    lng:-48.4902,
+    coleta:["celulares","pilhas","baterias"]
+  },
+
+  {
+    estado:"AM",
+    cidade:"Manaus",
+    bairro:"Centro",
+    nome:"Amazonas Shopping",
+    endereco:"Av. Djalma Batista, 482",
+    cep:"69050-010",
+    maps:"https://www.google.com/maps?q=-3.1190,-60.0217",
+    lat:-3.1190,
+    lng:-60.0217,
+    coleta:["eletrônicos","celulares","baterias","telefones"]
+  },
+
+  {
+    estado:"SP",
+    cidade:"São Paulo",
+    bairro:"Sé",
+    nome:"Poupatempo Sé",
+    endereco:"Praça do Carmo, s/n",
+    cep:"01019-020",
+    maps:"https://www.google.com/maps?q=-23.5505,-46.6333",
+    lat:-23.5505,
+    lng:-46.6333,
+    coleta:["pilhas","baterias","documentos digitais","celulares"]
+  },
+
+  {
+    estado:"SP",
+    cidade:"São Paulo",
+    bairro:"Morumbi",
+    nome:"Shopping Morumbi",
+    endereco:"Av. Roque Petroni Jr, 1089",
+    cep:"04707-900",
+    maps:"https://www.google.com/maps?q=-23.6226,-46.6986",
+    lat:-23.6226,
+    lng:-46.6986,
+    coleta:["celulares","computadores","notebooks","cabos"]
+  },
+
+  {
+    estado:"RJ",
+    cidade:"Niterói",
+    bairro:"Icaraí",
+    nome:"Plaza Niterói Eco Ponto",
+    endereco:"Rua XV de Novembro, 8",
+    cep:"24020-125",
+    maps:"https://www.google.com/maps?q=-22.8839,-43.1034",
+    lat:-22.8839,
+    lng:-43.1034,
+    coleta:["pilhas","baterias","celulares","eletrônicos"]
+  },
+
+  {
+    estado:"PR",
+    cidade:"Curitiba",
+    bairro:"Batel",
+    nome:"Shopping Curitiba",
+    endereco:"Rua Brigadeiro Franco, 2300",
+    cep:"80250-030",
+    maps:"https://www.google.com/maps?q=-25.4392,-49.2739",
+    lat:-25.4392,
+    lng:-49.2739,
+    coleta:["eletrônicos","computadores","fios","geladeiras","TVs"]
+  }
+
+];
+
+const map = L.map("map").setView([-14.2, -51.9], 4);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+let markers = [];
+
+
+function renderMapa(){
+
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  pontos.forEach(p => {
+
+    const marker = L.marker([p.lat, p.lng])
+      .addTo(map)
+      .bindPopup(`
+        <b>${p.nome}</b><br>
+        <a href="${p.maps}" target="_blank">Abrir no Google Maps</a>
+      `);
+
+    markers.push(marker);
+
+  });
+
+}
+
+
+function renderLocais(){
+
+  const container = document.getElementById("lista-locais");
+  container.innerHTML = "";
+
+  pontos.forEach(p => {
+
+    container.innerHTML += `
+      <div class="card">
+
+        <h3>${p.nome}</h3>
+
+        <p>${p.cidade} - ${p.estado}</p>
+        <p>${p.bairro}</p>
+        <p>${p.endereco}</p>
+
+        <p><strong>Coleta:</strong> ${p.coleta.join(", ")}</p>
+
+        <a href="${p.maps}" target="_blank" class="mapButton">
+          Ver no Google Maps
+        </a>
+
+      </div>
+    `;
+
+  });
+
+}
+
+renderMapa();
+renderLocais();
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
